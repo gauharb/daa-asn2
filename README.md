@@ -258,38 +258,38 @@ python3 plot_results.py   # generates results/plots/*.png from results/tables/*.
 
 | Structure | n | Avg time (ns) | Accesses | Theoretical |
 |---|---|---|---|---|
-| DynamicArray | 100 | 473,840 | 10,000 | Θ(1) per call |
-| LinkedList | 100 | 914,500 | 10,000 | Θ(n) per call |
-| DynamicArray | 1,000 | 47,240 | 10,000 | Θ(1) |
-| LinkedList | 1,000 | 2,838,560 | 10,000 | Θ(n) |
-| DynamicArray | 10,000 | 66,660 | 10,000 | Θ(1) |
-| LinkedList | 10,000 | 30,399,720 | 10,000 | Θ(n) |
-| DynamicArray | 100,000 | 46,540 | 10,000 | Θ(1) |
-| LinkedList | 100,000 | 336,025,460 | 10,000 | Θ(n) |
+| DynamicArray | 100 | 1,036,680 | 10,000 | Θ(1) per call |
+| LinkedList | 100 | 1,478,700 | 10,000 | Θ(n) per call |
+| DynamicArray | 1,000 | 112,500 | 10,000 | Θ(1) |
+| LinkedList | 1,000 | 4,120,280 | 10,000 | Θ(n) |
+| DynamicArray | 10,000 | 109,640 | 10,000 | Θ(1) |
+| LinkedList | 10,000 | 46,279,880 | 10,000 | Θ(n) |
+| DynamicArray | 100,000 | 87,880 | 10,000 | Θ(1) |
+| LinkedList | 100,000 | 509,652,740 | 10,000 | Θ(n) |
 
 ![Workload 1](results/plots/workload1_time_vs_n.png)
 
 **Analysis.** The Linked List's time grows essentially linearly with n on the log-log plot — from
-n = 1,000 to n = 100,000 (a 100× growth in n) its time grows from ~2.84 ms to ~336 ms, i.e.
-~118×, matching Θ(n) closely. The Dynamic Array's time drops from n = 100 to n = 1,000 and then
-stays essentially flat (47,240 → 66,660 → 46,540 ns) — this is a JIT warm-up artifact: n = 100
-runs first, before the JVM has compiled `get()` to native code, so it is measured slower than the
-later, "hot" runs, not because Θ(1) predicts growth. Once warmed up, the time is flat regardless
-of n, exactly as Θ(1) predicts. Overall, results strongly agree with theory: the Dynamic Array is
-the clear winner for random access, by 3–4 orders of magnitude at large n.
+n = 1,000 to n = 100,000 (a 100× growth in n) its time grows from ~4.12 ms to ~509.65 ms, i.e.
+~124×, matching Θ(n) closely. The Dynamic Array's time drops sharply from n = 100 to n = 1,000
+and then stays essentially flat (112,500 → 109,640 → 87,880 ns) — this is a JIT warm-up artifact:
+n = 100 runs first, before the JVM has compiled `get()` to native code, so it is measured much
+slower than the later, "hot" runs, not because Θ(1) predicts growth. Once warmed up, the time is
+flat regardless of n, exactly as Θ(1) predicts. Overall, results strongly agree with theory: the
+Dynamic Array is the clear winner for random access, by 3–4 orders of magnitude at large n.
 
 ### Workload 2 — Search (`contains(value)`, 1,000 calls)
 
 | Structure | n | Avg time (ns) | Comparisons | Theoretical |
 |---|---|---|---|---|
-| DynamicArray | 100 | 1,259,040 | 100,000 | Θ(n) |
-| LinkedList | 100 | 886,660 | 100,000 | Θ(n) |
-| DynamicArray | 1,000 | 1,126,860 | 1,000,000 | Θ(n) |
-| LinkedList | 1,000 | 3,779,520 | 1,000,000 | Θ(n) |
-| DynamicArray | 10,000 | 4,934,660 | 10,000,000 | Θ(n) |
-| LinkedList | 10,000 | 22,064,380 | 10,000,000 | Θ(n) |
-| DynamicArray | 100,000 | 68,942,540 | 100,000,000 | Θ(n) |
-| LinkedList | 100,000 | 225,137,840 | 100,000,000 | Θ(n) |
+| DynamicArray | 100 | 1,261,380 | 100,000 | Θ(n) |
+| LinkedList | 100 | 1,303,820 | 100,000 | Θ(n) |
+| DynamicArray | 1,000 | 2,334,680 | 1,000,000 | Θ(n) |
+| LinkedList | 1,000 | 3,211,800 | 1,000,000 | Θ(n) |
+| DynamicArray | 10,000 | 7,619,060 | 10,000,000 | Θ(n) |
+| LinkedList | 10,000 | 30,171,940 | 10,000,000 | Θ(n) |
+| DynamicArray | 100,000 | 81,758,280 | 100,000,000 | Θ(n) |
+| LinkedList | 100,000 | 306,818,700 | 100,000,000 | Θ(n) |
 
 ![Workload 2 time](results/plots/workload2_time_vs_n.png)
 ![Workload 2 comparisons](results/plots/workload2_comparisons_vs_n.png)
@@ -297,10 +297,10 @@ the clear winner for random access, by 3–4 orders of magnitude at large n.
 **Analysis.** Comparison counts are **identical** between the two structures at every n (both
 scan linearly through every element), confirming both have the same Θ(n) comparison complexity —
 this is a case of *same Big-O, different constant factor*. Execution time diverges as n grows: at
-n = 100 the Dynamic Array even measures slightly slower (1,259,040 ns vs. 886,660 ns) — again a
-JIT warm-up artifact, since n = 100 is the first, not-yet-hot run — but by n = 100,000 the Dynamic
-Array is about 3.3× faster (68.9 ms vs. 225.1 ms), because contiguous array scanning has excellent
-CPU cache locality (sequential memory access, prefetch-friendly), while list traversal follows
+n = 100 the two structures are nearly tied (1,261,380 ns vs. 1,303,820 ns — both still affected by
+JIT warm-up, since n = 100 is the first, not-yet-hot run), but by n = 100,000 the Dynamic Array is
+about 3.75× faster (81.8 ms vs. 306.8 ms), because contiguous array scanning has excellent CPU
+cache locality (sequential memory access, prefetch-friendly), while list traversal follows
 heap-allocated pointers scattered in memory, causing many more cache misses per element visited.
 Increasing n increases both time and comparisons roughly proportionally for both structures,
 matching the linear prediction — comparisons scale exactly 10× for each 10× growth in n, as
@@ -310,14 +310,14 @@ expected for Θ(n).
 
 | Structure | n | Position | Operation | Avg time (ns) | Movements |
 |---|---|---|---|---|---|
-| DynamicArray | 100,000 | begin | insert | 154,905,300 | 100,499,500 |
-| LinkedList | 100,000 | begin | insert | 51,820 | 0 |
-| DynamicArray | 100,000 | begin | remove | 105,055,340 | 99,500,500 |
-| LinkedList | 100,000 | begin | remove | 20,360 | 0 |
-| DynamicArray | 100,000 | middle | insert | 77,087,520 | 50,499,500 |
-| LinkedList | 100,000 | middle | insert | 100,540,880 | 50,000,000 |
-| DynamicArray | 100,000 | middle | remove | 47,456,100 | 49,500,500 |
-| LinkedList | 100,000 | middle | remove | 108,258,520 | 50,000,000 |
+| DynamicArray | 100,000 | begin | insert | 201,176,920 | 100,499,500 |
+| LinkedList | 100,000 | begin | insert | 54,300 | 0 |
+| DynamicArray | 100,000 | begin | remove | 109,922,980 | 99,500,500 |
+| LinkedList | 100,000 | begin | remove | 26,700 | 0 |
+| DynamicArray | 100,000 | middle | insert | 80,922,800 | 50,499,500 |
+| LinkedList | 100,000 | middle | insert | 107,710,040 | 50,000,000 |
+| DynamicArray | 100,000 | middle | remove | 50,566,700 | 49,500,500 |
+| LinkedList | 100,000 | middle | remove | 105,329,760 | 50,000,000 |
 
 *(these numbers reflect the corrected version of the benchmark, where the m random values to
 insert are pre-generated into an array before the timer starts, rather than being generated by
@@ -331,8 +331,8 @@ insert are pre-generated into an array before the timer starts, rather than bein
 **Analysis.**
 - **Insertion/removal at the beginning:** the Dynamic Array pays O(n) shifting cost on *every*
   one of the 1,000 operations (worst case for the array), while the Linked List pays O(1) per
-  operation (head pointer, no traversal needed) — this is where the list wins by roughly 3
-  orders of magnitude (~3,000×), matching theory exactly.
+  operation (head pointer, no traversal needed) — this is where the list wins by roughly 3.5
+  orders of magnitude (~3,700×), matching theory exactly.
 - **Insertion/removal in the middle:** the array's cost drops (only ~n/2 elements shift instead
   of n), but the list's cost *rises* dramatically, because 1,000 middle-position operations force
   1,000 separate O(n/2) traversals from the nearer end — the list has no way to "remember" the
@@ -348,22 +348,22 @@ insert are pre-generated into an array before the timer starts, rather than bein
 
 | n | Avg insert time (ns) | Avg extract time (ns) | Comparisons | Order OK |
 |---|---|---|---|---|
-| 100 | 19,800 | 52,500 | 1,069 | true |
-| 1,000 | 85,480 | 185,920 | 17,322 | true |
-| 10,000 | 627,480 | 1,425,360 | 239,284 | true |
-| 100,000 | 1,828,360 | 10,393,440 | 3,059,283 | true |
+| 100 | 52,560 | 108,020 | 1,069 | true |
+| 1,000 | 244,540 | 523,240 | 17,322 | true |
+| 10,000 | 1,164,460 | 2,677,100 | 239,284 | true |
+| 100,000 | 3,415,220 | 20,099,100 | 3,059,283 | true |
 
 ![Workload 4 time](results/plots/workload4_time_vs_n.png)
 ![Workload 4 comparisons](results/plots/workload4_comparisons_vs_n.png)
 
 **Analysis.**
 - `insert` is Θ(log n) per call; over n calls, total insert time is Θ(n log n) — consistent with
-  the roughly ×21 growth in total insert time for a ×1,000 growth in n from 1,000 to 100,000
+  the roughly ×65 growth in total insert time for a ×1,000 growth in n from 100 to 100,000
   (log n grows slowly, so the increase is driven mostly by the extra n itself, not by each call
   getting much slower).
 - `extractMin` is likewise Θ(log n) per call, Θ(n log n) total, but consistently costs more
-  wall-clock time than the matching insert phase at the same n (e.g. 10.39 ms vs. 1.83 ms at
-  n = 100,000, roughly 5.7×), because sift-down compares against *two* children per level versus
+  wall-clock time than the matching insert phase at the same n (e.g. 20.10 ms vs. 3.42 ms at
+  n = 100,000, roughly 5.9×), because sift-down compares against *two* children per level versus
   sift-up's *one* parent comparison per level (see §2.4).
 - `peekMin` (not separately benchmarked as a workload since it is trivially Θ(1) and dominates
   nothing) is O(1) by construction — a single array read.
