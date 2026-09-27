@@ -22,7 +22,7 @@ public class Benchmark {
     }
 
     private static void workload1_RandomAccess() throws IOException {
-        System.out.println("    Workload 1: Random Access   ");
+        System.out.println("    Workload 1: Random Access    ");
         try (PrintWriter w = csv("workload1_random_access.csv",
                 "structure,n,avg_time_ns,accesses")) {
             for (int n : SIZES) {
@@ -125,7 +125,12 @@ public class Benchmark {
     }
 
     private static void runInsertRemove(PrintWriter w, int n, int index, String label, int m) {
+
         Random valRnd = new Random(SEED + 2);
+        int[] valuesToInsert = new int[m];
+        for (int i = 0; i < m; i++) {
+            valuesToInsert[i] = valRnd.nextInt();
+        }
 
         double daInsertTime = 0;
         long daInsertMoves = 0;
@@ -133,7 +138,7 @@ public class Benchmark {
             DynamicArray<Integer> da = buildDynamicArray(n, SEED);
             long start = System.nanoTime();
             for (int i = 0; i < m; i++) {
-                da.add(Math.min(index, da.size()), valRnd.nextInt());
+                da.add(Math.min(index, da.size()), valuesToInsert[i]);
             }
             daInsertTime += System.nanoTime() - start;
         }
@@ -148,7 +153,7 @@ public class Benchmark {
             LinkedList<Integer> ll = buildLinkedList(n, SEED);
             long start = System.nanoTime();
             for (int i = 0; i < m; i++) {
-                ll.add(Math.min(index, ll.size()), valRnd.nextInt());
+                ll.add(Math.min(index, ll.size()), valuesToInsert[i]);
             }
             llInsertTime += System.nanoTime() - start;
         }
@@ -210,6 +215,7 @@ public class Benchmark {
         return total;
     }
 
+
     private static void workload4_PriorityProcessing() throws IOException {
         System.out.println("    Workload 4: Priority Processing (Min-Heap)    ");
         try (PrintWriter w = csv("workload4_priority.csv",
@@ -257,6 +263,7 @@ public class Benchmark {
             }
         }
     }
+
 
     private static DynamicArray<Integer> buildDynamicArray(int n, long seed) {
         Random rnd = new Random(seed);
